@@ -1,0 +1,192 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "abac8bbb-8390-44b4-b273-132e3bd69e94",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.pciconcursos.com.br/concursos/df/brasilia",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        496,
+        0
+      ],
+      "id": "d2880a22-46a3-4fe7-919c-e3775dbf0c6e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://www.pciconcursos.com.br/concursos/centrooeste/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        336,
+        0
+      ],
+      "id": "26a549eb-e8e5-4c44-b34e-6d09fb5db3d9",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "https://globo.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        176,
+        0
+      ],
+      "id": "40a15085-0edf-44d0-a772-a20613f67d7c",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-flash-lite-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-flash-lite-latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um assistente especialista em concursos públicos do DF nacionais, porém com sede em brasília e concursos do Entorno do DF. Com base nas informações fornecidas, crie um resumo diário direto, amigável e muito bem formatado para o Telegram.\nRegras fundamentais de escrita:\n1. Comece a mensagem IMEDIATAMENTE com uma introdução curta e com emojis, exatamente assim: \"📢 *Olá! Aqui estão as principais novidades de concursos públicos para o DF e Entorno hoje:*\"\n2. NUNCA mencione frases como \"Com base no HTML fornecido\", \"Filtros aplicados\" ou termos técnicos. O usuário final não deve saber de onde os dados vieram.\n3. Liste os concursos usando tópicos limpos. Use um emoji de dinheiro (💰) para o salário e um emoji de seta (🔗) para o link do edital.\n4. Se não houver concursos novos ou abertos nos dados, retorne: \"📢 *Olá! Não foram encontradas novas atualizações de editais no DF e Entorno hoje. Bons estudos!*\"\nConsidere as seguintes informações brutas para extração:\n{{ $json.data }}\n{{ $('HTTP Request1').item.json.data }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "4f332671-f71b-4ef6-af9c-edd5cc178a0c",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "nSGNNiQurgMXndjS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8529772970",
+        "text": "={{ $json.content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        0
+      ],
+      "id": "e7fbf23b-984d-49c3-820b-bb244690b9a9",
+      "name": "Send a text message",
+      "webhookId": "44287cbd-44bf-4831-8a72-7ea5c3a2666c",
+      "credentials": {
+        "telegramApi": {
+          "id": "hQXGIkyk3S9k1EjY",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "106bef30-9a79-4276-b2af-51d1ede6e551",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a2ca14707554a03fc4338c3e4f42004a856a600e8ccf42341cd064d842a8a71"
+  },
+  "nodeGroups": [],
+  "id": "KzFdCevJQ8BZdPMu",
+  "tags": []
+}
